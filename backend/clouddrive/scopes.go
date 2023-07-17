@@ -37,18 +37,8 @@ a non root folder as its starting point.
 `,
 		Advanced: true,
 	}, {
-		Name: "service_account_file",
-		Help: "Service Account Credentials JSON file path.\n\nLeave blank normally.\nNeeded only if you want use SA instead of interactive login." + env.ShellExpandHelp,
-	}, {
-		Name:     "service_account_credentials",
-		Help:     "Service Account Credentials JSON blob.\n\nLeave blank normally.\nNeeded only if you want use SA instead of interactive login.",
-		Hide:     fs.OptionHideConfigurator,
-		Advanced: true,
-	}, {
-		Name:     "team_drive",
-		Help:     "ID of the Shared Drive (Team Drive).",
-		Hide:     fs.OptionHideConfigurator,
-		Advanced: true,
+		Name: "master_key_file",
+		Help: "Path to master key file (JSON)" + env.ShellExpandHelp,
 	}, {
 		Name:     "auth_owner_only",
 		Default:  false,
