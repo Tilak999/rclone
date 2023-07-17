@@ -59,10 +59,11 @@ See the following for detailed instructions for
   * [Memory](/memory/)
   * [Microsoft Azure Blob Storage](/azureblob/)
   * [Microsoft OneDrive](/onedrive/)
-  * [OpenStack Swift / Rackspace Cloudfiles / Memset Memstore](/swift/)
+  * [OpenStack Swift / Rackspace Cloudfiles / Blomp Cloud Storage / Memset Memstore](/swift/)
   * [OpenDrive](/opendrive/)
   * [Oracle Object Storage](/oracleobjectstorage/)
   * [Pcloud](/pcloud/)
+  * [PikPak](/pikpak/)
   * [premiumize.me](/premiumizeme/)
   * [put.io](/putio/)
   * [QingStor](/qingstor/)
@@ -951,15 +952,17 @@ To reduce risk of corrupting an existing configuration file, rclone
 will not write directly to it when saving changes. Instead it will
 first write to a new, temporary, file. If a configuration file already
 existed, it will (on Unix systems) try to mirror its permissions to
-the new file. Then it will rename the existing file by adding suffix
-".old" to its name (e.g. `rclone.conf.old`), if a file with the same
-name already exists it will simply be replaced. Next, rclone will rename
-the new file to the correct name, before finally cleaning up by deleting
-the original file now which has now ".old" suffix to its name. Note that
-one side-effect of this is that if you happen to have a file in the same
-directory and with the same name as your configuration file, but with
-suffix ".old", then rclone will end up deleting this file next time it
-updates its configuration file!
+the new file. Then it will rename the existing file to a temporary
+name as backup. Next, rclone will rename the new file to the correct name,
+before finally cleaning up by deleting the backup file.
+
+If the configuration file path used by rclone is a symbolic link, then
+this will be evaluated and rclone will write to the resolved path, instead
+of overwriting the symbolic link. Temporary files used in the process
+(described above) will be written to the same parent directory as that
+of the resolved configuration file, but if this directory is also a
+symbolic link it will not be resolved and the temporary files will be
+written to the location of the directory symbolic link.
 
 ### --contimeout=TIME ###
 
@@ -988,6 +991,18 @@ See `--compare-dest` and `--backup-dir`.
 Mode to run dedupe command in.  One of `interactive`, `skip`, `first`, 
 `newest`, `oldest`, `rename`.  The default is `interactive`.  
 See the dedupe command for more information as to what these options mean.
+
+### --default-time TIME ###
+
+If a file or directory does have a modification time rclone can read
+then rclone will display this fixed time instead.
+
+The default is `2000-01-01 00:00:00 UTC`. This can be configured in
+any of the ways shown in [the time or duration options](#time-option).
+
+For example `--default-time 2020-06-01` to set the default time to the
+1st of June 2020 or `--default-time 0s` to set the default time to the
+time rclone started up.
 
 ### --disable FEATURE,FEATURE,... ###
 
@@ -1242,6 +1257,49 @@ This can be useful as an additional layer of protection for immutable
 or append-only data sets (notably backup archives), where modification
 implies corruption and should not be propagated.
 
+### --inplace {#inplace}
+
+The `--inplace` flag changes the behaviour of rclone when uploading
+files to some backends (backends with the `PartialUploads` feature
+flag set) such as:
+
+- local
+- ftp
+- sftp
+
+Without `--inplace` (the default) rclone will first upload to a
+temporary file with an extension like this where `XXXXXX` represents a
+random string.
+
+    original-file-name.XXXXXX.partial
+
+(rclone will make sure the final name is no longer than 100 characters
+by truncating the `original-file-name` part if necessary).
+
+When the upload is complete, rclone will rename the `.partial` file to
+the correct name, overwriting any existing file at that point. If the
+upload fails then the `.partial` file will be deleted.
+
+This prevents other users of the backend from seeing partially
+uploaded files in their new names and prevents overwriting the old
+file until the new one is completely uploaded.
+
+If the `--inplace` flag is supplied, rclone will upload directly to
+the final name without creating a `.partial` file.
+
+This means that an incomplete file will be visible in the directory
+listings while the upload is in progress and any existing files will
+be overwritten as soon as the upload starts. If the transfer fails
+then the file will be deleted. This can cause data loss of the
+existing file if the transfer fails.
+
+Note that on the local file system if you don't use `--inplace` hard
+links (Unix only) will be broken. And if you do use `--inplace` you
+won't be able to update in use executables.
+
+Note also that versions of rclone prior to v1.63.0 behave as if the
+`--inplace` flag is always supplied.
+
 ### -i, --interactive {#interactive}
 
 This flag can be used to tell rclone that you wish a manual
@@ -1452,6 +1510,25 @@ if you are reading and writing to an OS X filing system this will be
 `1s` by default.
 
 This command line flag allows you to override that computed default.
+
+### --multi-thread-write-buffer-size=SIZE ###
+
+When downloading with multiple threads, rclone will buffer SIZE bytes in
+memory before writing to disk for each thread.
+
+This can improve performance if the underlying filesystem does not deal
+well with a lot of small writes in different positions of the file, so
+if you see downloads being limited by disk write speed, you might want
+to experiment with different values. Specially for magnetic drives and
+remote file systems a higher value can be useful.
+
+Nevertheless, the default of `128k` should be fine for almost all use
+cases, so before changing it ensure that network is not really your
+bottleneck.
+
+As a final hint, size is not the only factor: block size (or similar
+concept) can have an impact. In one case, we observed that exact
+multiples of 16k performed much better than other values.
 
 ### --multi-thread-cutoff=SIZE ###
 

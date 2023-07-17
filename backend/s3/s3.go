@@ -66,7 +66,7 @@ import (
 func init() {
 	fs.Register(&fs.RegInfo{
 		Name:        "s3",
-		Description: "Amazon S3 Compliant Storage Providers including AWS, Alibaba, Ceph, China Mobile, Cloudflare, GCS, ArvanCloud, DigitalOcean, Dreamhost, Huawei OBS, IBM COS, IDrive e2, IONOS Cloud, Liara, Lyve Cloud, Minio, Netease, RackCorp, Scaleway, SeaweedFS, StackPath, Storj, Tencent COS, Qiniu and Wasabi",
+		Description: "Amazon S3 Compliant Storage Providers including AWS, Alibaba, ArvanCloud, Ceph, China Mobile, Cloudflare, GCS, DigitalOcean, Dreamhost, Huawei OBS, IBM COS, IDrive e2, IONOS Cloud, Liara, Lyve Cloud, Minio, Netease, Petabox, RackCorp, Scaleway, SeaweedFS, StackPath, Storj, Tencent COS, Qiniu and Wasabi",
 		NewFs:       NewFs,
 		CommandHelp: commandHelp,
 		Config: func(ctx context.Context, name string, m configmap.Mapper, config fs.ConfigIn) (*fs.ConfigOut, error) {
@@ -92,6 +92,9 @@ func init() {
 				Value: "Alibaba",
 				Help:  "Alibaba Cloud Object Storage System (OSS) formerly Aliyun",
 			}, {
+				Value: "ArvanCloud",
+				Help:  "Arvan Cloud Object Storage (AOS)",
+			}, {
 				Value: "Ceph",
 				Help:  "Ceph Object Storage",
 			}, {
@@ -100,9 +103,6 @@ func init() {
 			}, {
 				Value: "Cloudflare",
 				Help:  "Cloudflare R2 Storage",
-			}, {
-				Value: "ArvanCloud",
-				Help:  "Arvan Cloud Object Storage (AOS)",
 			}, {
 				Value: "DigitalOcean",
 				Help:  "DigitalOcean Spaces",
@@ -136,6 +136,9 @@ func init() {
 			}, {
 				Value: "Netease",
 				Help:  "Netease Object Storage (NOS)",
+			}, {
+				Value: "Petabox",
+				Help:  "Petabox Object Storage",
 			}, {
 				Value: "RackCorp",
 				Help:  "RackCorp Object Storage",
@@ -442,8 +445,28 @@ func init() {
 			}},
 		}, {
 			Name:     "region",
+			Help:     "Region where your bucket will be created and your data stored.\n",
+			Provider: "Petabox",
+			Examples: []fs.OptionExample{{
+				Value: "us-east-1",
+				Help:  "US East (N. Virginia)",
+			}, {
+				Value: "eu-central-1",
+				Help:  "Europe (Frankfurt)",
+			}, {
+				Value: "ap-southeast-1",
+				Help:  "Asia Pacific (Singapore)",
+			}, {
+				Value: "me-south-1",
+				Help:  "Middle East (Bahrain)",
+			}, {
+				Value: "sa-east-1",
+				Help:  "South America (São Paulo)",
+			}},
+		}, {
+			Name:     "region",
 			Help:     "Region to connect to.\n\nLeave blank if you are using an S3 clone and you don't have a region.",
-			Provider: "!AWS,Alibaba,ChinaMobile,Cloudflare,IONOS,ArvanCloud,Liara,Qiniu,RackCorp,Scaleway,Storj,TencentCOS,HuaweiOBS,IDrive",
+			Provider: "!AWS,Alibaba,ArvanCloud,ChinaMobile,Cloudflare,IONOS,Petabox,Liara,Qiniu,RackCorp,Scaleway,Storj,TencentCOS,HuaweiOBS,IDrive",
 			Examples: []fs.OptionExample{{
 				Value: "",
 				Help:  "Use this if unsure.\nWill use v4 signatures and an empty region.",
@@ -552,15 +575,15 @@ func init() {
 				Help:  "Anhui China (Huainan)",
 			}},
 		}, {
-			// ArvanCloud endpoints: https://www.arvancloud.com/en/products/cloud-storage
+			// ArvanCloud endpoints: https://www.arvancloud.ir/en/products/cloud-storage
 			Name:     "endpoint",
 			Help:     "Endpoint for Arvan Cloud Object Storage (AOS) API.",
 			Provider: "ArvanCloud",
 			Examples: []fs.OptionExample{{
-				Value: "s3.ir-thr-at1.arvanstorage.com",
-				Help:  "The default endpoint - a good choice if you are unsure.\nTehran Iran (Asiatech)",
+				Value: "s3.ir-thr-at1.arvanstorage.ir",
+				Help:  "The default endpoint - a good choice if you are unsure.\nTehran Iran (Simin)",
 			}, {
-				Value: "s3.ir-tbz-sh1.arvanstorage.com",
+				Value: "s3.ir-tbz-sh1.arvanstorage.ir",
 				Help:  "Tabriz Iran (Shahriar)",
 			}},
 		}, {
@@ -767,6 +790,30 @@ func init() {
 			}, {
 				Value: "s3-eu-south-2.ionoscloud.com",
 				Help:  "Logrono, Spain",
+			}},
+		}, {
+			Name:     "endpoint",
+			Help:     "Endpoint for Petabox S3 Object Storage.\n\nSpecify the endpoint from the same region.",
+			Provider: "Petabox",
+			Required: true,
+			Examples: []fs.OptionExample{{
+				Value: "s3.petabox.io",
+				Help:  "US East (N. Virginia)",
+			}, {
+				Value: "s3.us-east-1.petabox.io",
+				Help:  "US East (N. Virginia)",
+			}, {
+				Value: "s3.eu-central-1.petabox.io",
+				Help:  "Europe (Frankfurt)",
+			}, {
+				Value: "s3.ap-southeast-1.petabox.io",
+				Help:  "Asia Pacific (Singapore)",
+			}, {
+				Value: "s3.me-south-1.petabox.io",
+				Help:  "Middle East (Bahrain)",
+			}, {
+				Value: "s3.sa-east-1.petabox.io",
+				Help:  "South America (São Paulo)",
 			}},
 		}, {
 			// Liara endpoints: https://liara.ir/landing/object-storage
@@ -1109,7 +1156,7 @@ func init() {
 		}, {
 			Name:     "endpoint",
 			Help:     "Endpoint for S3 API.\n\nRequired when using an S3 clone.",
-			Provider: "!AWS,IBMCOS,IDrive,IONOS,TencentCOS,HuaweiOBS,Alibaba,ChinaMobile,GCS,Liara,ArvanCloud,Scaleway,StackPath,Storj,RackCorp,Qiniu",
+			Provider: "!AWS,ArvanCloud,IBMCOS,IDrive,IONOS,TencentCOS,HuaweiOBS,Alibaba,ChinaMobile,GCS,Liara,Scaleway,StackPath,Storj,RackCorp,Qiniu,Petabox",
 			Examples: []fs.OptionExample{{
 				Value:    "objects-us-east-1.dream.io",
 				Help:     "Dream Objects endpoint",
@@ -1211,8 +1258,12 @@ func init() {
 				Help:     "Liara Iran endpoint",
 				Provider: "Liara",
 			}, {
-				Value:    "s3.ir-thr-at1.arvanstorage.com",
-				Help:     "ArvanCloud Tehran Iran (Asiatech) endpoint",
+				Value:    "s3.ir-thr-at1.arvanstorage.ir",
+				Help:     "ArvanCloud Tehran Iran (Simin) endpoint",
+				Provider: "ArvanCloud",
+			}, {
+				Value:    "s3.ir-tbz-sh1.arvanstorage.ir",
+				Help:     "ArvanCloud Tabriz Iran (Shahriar) endpoint",
 				Provider: "ArvanCloud",
 			}},
 		}, {
@@ -1396,7 +1447,7 @@ func init() {
 			Provider: "ArvanCloud",
 			Examples: []fs.OptionExample{{
 				Value: "ir-thr-at1",
-				Help:  "Tehran Iran (Asiatech)",
+				Help:  "Tehran Iran (Simin)",
 			}, {
 				Value: "ir-tbz-sh1",
 				Help:  "Tabriz Iran (Shahriar)",
@@ -1593,7 +1644,7 @@ func init() {
 		}, {
 			Name:     "location_constraint",
 			Help:     "Location constraint - must be set to match the Region.\n\nLeave blank if not sure. Used when creating buckets only.",
-			Provider: "!AWS,Alibaba,HuaweiOBS,ChinaMobile,Cloudflare,IBMCOS,IDrive,IONOS,Liara,ArvanCloud,Qiniu,RackCorp,Scaleway,StackPath,Storj,TencentCOS",
+			Provider: "!AWS,Alibaba,ArvanCloud,HuaweiOBS,ChinaMobile,Cloudflare,IBMCOS,IDrive,IONOS,Liara,Qiniu,RackCorp,Scaleway,StackPath,Storj,TencentCOS,Petabox",
 		}, {
 			Name: "acl",
 			Help: `Canned ACL used when creating buckets and storing or copying objects.
@@ -1836,7 +1887,7 @@ If you leave it blank, this is calculated automatically from the sse_customer_ke
 				Help:  "Standard storage class",
 			}},
 		}, {
-			// Mapping from here: https://www.arvancloud.com/en/products/cloud-storage
+			// Mapping from here: https://www.arvancloud.ir/en/products/cloud-storage
 			Name:     "storage_class",
 			Help:     "The storage class to use when storing new objects in ArvanCloud.",
 			Provider: "ArvanCloud",
@@ -1863,7 +1914,7 @@ If you leave it blank, this is calculated automatically from the sse_customer_ke
 				Help:  "Infrequent access storage mode",
 			}},
 		}, {
-			// Mapping from here: https://www.scaleway.com/en/docs/object-storage-glacier/#-Scaleway-Storage-Classes
+			// Mapping from here: https://www.scaleway.com/en/docs/storage/object/quickstart/
 			Name:     "storage_class",
 			Help:     "The storage class to use when storing new objects in S3.",
 			Provider: "Scaleway",
@@ -1872,10 +1923,13 @@ If you leave it blank, this is calculated automatically from the sse_customer_ke
 				Help:  "Default.",
 			}, {
 				Value: "STANDARD",
-				Help:  "The Standard class for any upload.\nSuitable for on-demand content like streaming or CDN.",
+				Help:  "The Standard class for any upload.\nSuitable for on-demand content like streaming or CDN.\nAvailable in all regions.",
 			}, {
 				Value: "GLACIER",
-				Help:  "Archived storage.\nPrices are lower, but it needs to be restored first to be accessed.",
+				Help:  "Archived storage.\nPrices are lower, but it needs to be restored first to be accessed.\nAvailable in FR-PAR and NL-AMS regions.",
+			}, {
+				Value: "ONEZONE_IA",
+				Help:  "One Zone - Infrequent Access.\nA good choice for storing secondary backup copies or easily re-creatable data.\nAvailable in the FR-PAR region only.",
 			}},
 		}, {
 			// Mapping from here: https://developer.qiniu.com/kodo/5906/storage-type
@@ -2194,6 +2248,15 @@ This is usually set to a CloudFront CDN URL as AWS S3 offers
 cheaper egress for data downloaded through the CloudFront network.`,
 			Advanced: true,
 		}, {
+			Name:     "directory_markers",
+			Default:  false,
+			Advanced: true,
+			Help: `Upload an empty object with a trailing slash when a new directory is created
+
+Empty folders are unsupported for bucket based remotes, this option creates an empty
+object ending with "/", to persist the folder.
+`,
+		}, {
 			Name: "use_multipart_etag",
 			Help: `Whether to use ETag in multipart uploads for verification
 
@@ -2422,6 +2485,7 @@ type Options struct {
 	MemoryPoolUseMmap     bool                 `config:"memory_pool_use_mmap"`
 	DisableHTTP2          bool                 `config:"disable_http2"`
 	DownloadURL           string               `config:"download_url"`
+	DirectoryMarkers      bool                 `config:"directory_markers"`
 	UseMultipartEtag      fs.Tristate          `config:"use_multipart_etag"`
 	UsePresignedRequest   bool                 `config:"use_presigned_request"`
 	Versions              bool                 `config:"versions"`
@@ -2868,6 +2932,8 @@ func setQuirks(opt *Options) {
 		// listObjectsV2 supported - https://api.ionos.com/docs/s3/#Basic-Operations-get-Bucket-list-type-2
 		virtualHostStyle = false
 		urlEncodeListings = false
+	case "Petabox":
+		// No quirks
 	case "Liara":
 		virtualHostStyle = false
 		urlEncodeListings = false
@@ -2911,6 +2977,7 @@ func setQuirks(opt *Options) {
 	case "Qiniu":
 		useMultipartEtag = false
 		urlEncodeListings = false
+		virtualHostStyle = false
 	case "GCS":
 		// Google break request Signature by mutating accept-encoding HTTP header
 		// https://github.com/rclone/rclone/issues/6670
@@ -2989,6 +3056,7 @@ func NewFs(ctx context.Context, name, root string, m configmap.Mapper) (fs.Fs, e
 	if err != nil {
 		return nil, err
 	}
+	fs.Debugf(nil, "name = %q, root = %q, opt = %#v", name, root, opt)
 	err = checkUploadChunkSize(opt.ChunkSize)
 	if err != nil {
 		return nil, fmt.Errorf("s3: chunk size: %w", err)
@@ -3078,6 +3146,9 @@ func NewFs(ctx context.Context, name, root string, m configmap.Mapper) (fs.Fs, e
 	}
 	if opt.Provider == "IDrive" {
 		f.features.SetTier = false
+	}
+	if opt.DirectoryMarkers {
+		f.features.CanHaveEmptyDirectories = true
 	}
 	// f.listMultipartUploads()
 
@@ -3571,6 +3642,7 @@ func (f *Fs) list(ctx context.Context, opt listOpt, fn listFn) error {
 	default:
 		listBucket = f.newV2List(&req)
 	}
+	foundItems := 0
 	for {
 		var resp *s3.ListObjectsV2Output
 		var err error
@@ -3612,6 +3684,7 @@ func (f *Fs) list(ctx context.Context, opt listOpt, fn listFn) error {
 			return err
 		}
 		if !opt.recurse {
+			foundItems += len(resp.CommonPrefixes)
 			for _, commonPrefix := range resp.CommonPrefixes {
 				if commonPrefix.Prefix == nil {
 					fs.Logf(f, "Nil common prefix received")
@@ -3644,6 +3717,7 @@ func (f *Fs) list(ctx context.Context, opt listOpt, fn listFn) error {
 				}
 			}
 		}
+		foundItems += len(resp.Contents)
 		for i, object := range resp.Contents {
 			remote := aws.StringValue(object.Key)
 			if urlEncodeListings {
@@ -3658,19 +3732,29 @@ func (f *Fs) list(ctx context.Context, opt listOpt, fn listFn) error {
 				fs.Logf(f, "Odd name received %q", remote)
 				continue
 			}
+			isDirectory := (remote == "" || strings.HasSuffix(remote, "/")) && object.Size != nil && *object.Size == 0
+			// is this a directory marker?
+			if isDirectory {
+				if opt.noSkipMarkers {
+					// process directory markers as files
+					isDirectory = false
+				} else {
+					// Don't insert the root directory
+					if remote == opt.directory {
+						continue
+					}
+					// process directory markers as directories
+					remote = strings.TrimRight(remote, "/")
+				}
+			}
 			remote = remote[len(opt.prefix):]
-			isDirectory := remote == "" || strings.HasSuffix(remote, "/")
 			if opt.addBucket {
 				remote = bucket.Join(opt.bucket, remote)
 			}
-			// is this a directory marker?
-			if isDirectory && object.Size != nil && *object.Size == 0 && !opt.noSkipMarkers {
-				continue // skip directory marker
-			}
 			if versionIDs != nil {
-				err = fn(remote, object, versionIDs[i], false)
+				err = fn(remote, object, versionIDs[i], isDirectory)
 			} else {
-				err = fn(remote, object, nil, false)
+				err = fn(remote, object, nil, isDirectory)
 			}
 			if err != nil {
 				if err == errEndList {
@@ -3681,6 +3765,20 @@ func (f *Fs) list(ctx context.Context, opt listOpt, fn listFn) error {
 		}
 		if !aws.BoolValue(resp.IsTruncated) {
 			break
+		}
+	}
+	if f.opt.DirectoryMarkers && foundItems == 0 && opt.directory != "" {
+		// Determine whether the directory exists or not by whether it has a marker
+		req := s3.HeadObjectInput{
+			Bucket: &opt.bucket,
+			Key:    &opt.directory,
+		}
+		_, err := f.headObject(ctx, &req)
+		if err != nil {
+			if err == fs.ErrorObjectNotFound {
+				return fs.ErrorDirNotFound
+			}
+			return err
 		}
 	}
 	return nil
@@ -3873,10 +3971,70 @@ func (f *Fs) bucketExists(ctx context.Context, bucket string) (bool, error) {
 	return false, err
 }
 
+// Create directory marker file and parents
+func (f *Fs) createDirectoryMarker(ctx context.Context, bucket, dir string) error {
+	if !f.opt.DirectoryMarkers || bucket == "" {
+		return nil
+	}
+
+	// Object to be uploaded
+	o := &Object{
+		fs: f,
+		meta: map[string]string{
+			metaMtime: swift.TimeToFloatString(time.Now()),
+		},
+	}
+
+	for {
+		_, bucketPath := f.split(dir)
+		// Don't create the directory marker if it is the bucket or at the very root
+		if bucketPath == "" {
+			break
+		}
+		o.remote = dir + "/"
+
+		// Check to see if object already exists
+		_, err := o.headObject(ctx)
+		if err == nil {
+			return nil
+		}
+
+		// Upload it if not
+		fs.Debugf(o, "Creating directory marker")
+		content := io.Reader(strings.NewReader(""))
+		err = o.Update(ctx, content, o)
+		if err != nil {
+			return fmt.Errorf("creating directory marker failed: %w", err)
+		}
+
+		// Now check parent directory exists
+		dir = path.Dir(dir)
+		if dir == "/" || dir == "." {
+			break
+		}
+	}
+
+	return nil
+}
+
 // Mkdir creates the bucket if it doesn't exist
 func (f *Fs) Mkdir(ctx context.Context, dir string) error {
 	bucket, _ := f.split(dir)
-	return f.makeBucket(ctx, bucket)
+	e := f.makeBucket(ctx, bucket)
+	if e != nil {
+		return e
+	}
+	return f.createDirectoryMarker(ctx, bucket, dir)
+}
+
+// mkdirParent creates the parent bucket/directory if it doesn't exist
+func (f *Fs) mkdirParent(ctx context.Context, remote string) error {
+	remote = strings.TrimRight(remote, "/")
+	dir := path.Dir(remote)
+	if dir == "/" || dir == "." {
+		dir = ""
+	}
+	return f.Mkdir(ctx, dir)
 }
 
 // makeBucket creates the bucket if it doesn't exist
@@ -3917,6 +4075,18 @@ func (f *Fs) makeBucket(ctx context.Context, bucket string) error {
 // Returns an error if it isn't empty
 func (f *Fs) Rmdir(ctx context.Context, dir string) error {
 	bucket, directory := f.split(dir)
+	// Remove directory marker file
+	if f.opt.DirectoryMarkers && bucket != "" && dir != "" {
+		o := &Object{
+			fs:     f,
+			remote: dir + "/",
+		}
+		fs.Debugf(o, "Removing directory marker")
+		err := o.Remove(ctx)
+		if err != nil {
+			return fmt.Errorf("removing directory marker failed: %w", err)
+		}
+	}
 	if bucket == "" || directory != "" {
 		return nil
 	}
@@ -4115,7 +4285,7 @@ func (f *Fs) Copy(ctx context.Context, src fs.Object, remote string) (fs.Object,
 		return nil, errNotWithVersionAt
 	}
 	dstBucket, dstPath := f.split(remote)
-	err := f.makeBucket(ctx, dstBucket)
+	err := f.mkdirParent(ctx, remote)
 	if err != nil {
 		return nil, err
 	}
@@ -4742,22 +4912,26 @@ func (o *Object) headObject(ctx context.Context) (resp *s3.HeadObjectOutput, err
 		Key:       &bucketPath,
 		VersionId: o.versionID,
 	}
-	if o.fs.opt.RequesterPays {
+	return o.fs.headObject(ctx, &req)
+}
+
+func (f *Fs) headObject(ctx context.Context, req *s3.HeadObjectInput) (resp *s3.HeadObjectOutput, err error) {
+	if f.opt.RequesterPays {
 		req.RequestPayer = aws.String(s3.RequestPayerRequester)
 	}
-	if o.fs.opt.SSECustomerAlgorithm != "" {
-		req.SSECustomerAlgorithm = &o.fs.opt.SSECustomerAlgorithm
+	if f.opt.SSECustomerAlgorithm != "" {
+		req.SSECustomerAlgorithm = &f.opt.SSECustomerAlgorithm
 	}
-	if o.fs.opt.SSECustomerKey != "" {
-		req.SSECustomerKey = &o.fs.opt.SSECustomerKey
+	if f.opt.SSECustomerKey != "" {
+		req.SSECustomerKey = &f.opt.SSECustomerKey
 	}
-	if o.fs.opt.SSECustomerKeyMD5 != "" {
-		req.SSECustomerKeyMD5 = &o.fs.opt.SSECustomerKeyMD5
+	if f.opt.SSECustomerKeyMD5 != "" {
+		req.SSECustomerKeyMD5 = &f.opt.SSECustomerKeyMD5
 	}
-	err = o.fs.pacer.Call(func() (bool, error) {
+	err = f.pacer.Call(func() (bool, error) {
 		var err error
-		resp, err = o.fs.c.HeadObjectWithContext(ctx, &req)
-		return o.fs.shouldRetry(ctx, err)
+		resp, err = f.c.HeadObjectWithContext(ctx, req)
+		return f.shouldRetry(ctx, err)
 	})
 	if err != nil {
 		if awsErr, ok := err.(awserr.RequestFailure); ok {
@@ -4767,7 +4941,9 @@ func (o *Object) headObject(ctx context.Context) (resp *s3.HeadObjectOutput, err
 		}
 		return nil, err
 	}
-	o.fs.cache.MarkOK(bucket)
+	if req.Bucket != nil {
+		f.cache.MarkOK(*req.Bucket)
+	}
 	return resp, nil
 }
 
@@ -5416,9 +5592,12 @@ func (o *Object) Update(ctx context.Context, in io.Reader, src fs.ObjectInfo, op
 		return errNotWithVersionAt
 	}
 	bucket, bucketPath := o.split()
-	err := o.fs.makeBucket(ctx, bucket)
-	if err != nil {
-		return err
+	// Create parent dir/bucket if not saving directory marker
+	if !strings.HasSuffix(o.remote, "/") {
+		err := o.fs.mkdirParent(ctx, o.remote)
+		if err != nil {
+			return err
+		}
 	}
 	modTime := src.ModTime(ctx)
 	size := src.Size()
@@ -5741,7 +5920,7 @@ func (o *Object) Metadata(ctx context.Context) (metadata fs.Metadata, err error)
 	setMetadata("content-disposition", o.contentDisposition)
 	setMetadata("content-encoding", o.contentEncoding)
 	setMetadata("content-language", o.contentLanguage)
-	setMetadata("tier", o.storageClass)
+	metadata["tier"] = o.GetTier()
 
 	return metadata, nil
 }

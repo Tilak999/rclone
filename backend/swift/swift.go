@@ -100,7 +100,7 @@ but other operations such as Remove and Copy will fail.
 func init() {
 	fs.Register(&fs.RegInfo{
 		Name:        "swift",
-		Description: "OpenStack Swift (Rackspace Cloud Files, Memset Memstore, OVH)",
+		Description: "OpenStack Swift (Rackspace Cloud Files, Blomp Cloud Storage, Memset Memstore, OVH)",
 		NewFs:       NewFs,
 		Options: append([]fs.Option{{
 			Name:    "env_auth",
@@ -142,6 +142,9 @@ func init() {
 			}, {
 				Value: "https://auth.cloud.ovh.net/v3",
 				Help:  "OVH",
+			}, {
+				Value: "https://authenticate.ain.net",
+				Help:  "Blomp Cloud Storage",
 			}},
 		}, {
 			Name: "user_id",
@@ -1558,6 +1561,10 @@ func (o *Object) Remove(ctx context.Context) (err error) {
 	// Remove file/manifest first
 	err = o.fs.pacer.Call(func() (bool, error) {
 		err = o.fs.c.ObjectDelete(ctx, container, containerPath)
+		if err == swift.ObjectNotFound {
+			fs.Errorf(o, "Dangling object - ignoring: %v", err)
+			err = nil
+		}
 		return shouldRetry(ctx, err)
 	})
 	if err != nil {

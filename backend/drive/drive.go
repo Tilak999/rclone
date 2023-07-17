@@ -499,7 +499,9 @@ need to use --ignore size also.`,
 		}, {
 			Name:    "server_side_across_configs",
 			Default: false,
-			Help: `Allow server-side operations (e.g. copy) to work across different drive configs.
+			Help: `Deprecated: use --server-side-across-configs instead.
+
+Allow server-side operations (e.g. copy) to work across different drive configs.
 
 This can be useful if you wish to do a server-side copy between two
 different Google drives.  Note that this isn't enabled by default
@@ -1512,6 +1514,9 @@ func (f *Fs) newObjectWithExportInfo(
 // NewObject finds the Object at remote.  If it can't be found
 // it returns the error fs.ErrorObjectNotFound.
 func (f *Fs) NewObject(ctx context.Context, remote string) (fs.Object, error) {
+	if strings.HasSuffix(remote, "/") {
+		return nil, fs.ErrorIsDir
+	}
 	info, extension, exportName, exportMimeType, isDocument, err := f.getRemoteInfoWithExport(ctx, remote)
 	if err != nil {
 		return nil, err
@@ -3881,7 +3886,7 @@ func (o *Object) Update(ctx context.Context, in io.Reader, src fs.ObjectInfo, op
 	if err != nil {
 		return err
 	}
-	newO, err := o.fs.newObjectWithInfo(ctx, src.Remote(), info)
+	newO, err := o.fs.newObjectWithInfo(ctx, o.remote, info)
 	if err != nil {
 		return err
 	}

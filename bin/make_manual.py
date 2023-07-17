@@ -64,6 +64,7 @@ docs = [
     "sia.md",
     "swift.md",
     "pcloud.md",
+    "pikpak.md",
     "premiumizeme.md",
     "putio.md",
     "seafile.md",
@@ -113,7 +114,7 @@ commands_order = [
 ignore_docs = [
     "downloads.md",
     "privacy.md",
-    "donate.md",
+    "sponsor.md",
 ]
 
 def read_doc(doc):
